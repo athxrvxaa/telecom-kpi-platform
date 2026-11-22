@@ -1,0 +1,17 @@
+# Local Airflow for the portfolio project. Single container ("standalone" mode, SQLite metadata DB).
+# Not a production setup, but it runs the exact same DAG you would deploy elsewhere.
+services:
+  airflow:
+    build: .
+    command: standalone
+    ports:
+      - "127.0.0.1:8080:8080"      # bound to localhost only
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/project/orchestration/dags
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "True"   # local only: no login screen
+      GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/gcp/adc.json
+      GCP_PROJECT: telecom-kpi-platform-515209
+    volumes:
+      - ..:/opt/airflow/project
+      - ${GCP_ADC_PATH}:/opt/airflow/gcp/adc.json:ro

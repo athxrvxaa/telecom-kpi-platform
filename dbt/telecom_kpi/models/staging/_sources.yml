@@ -1,0 +1,42 @@
+version: 2
+
+# Raw layer, exactly as delivered. Tests here are severity=warn: they DETECT
+# defects in the source without failing the build. Staging tests (error) prove
+# the defects were handled.
+sources:
+  - name: raw
+    schema: raw
+    description: Operational exports loaded as-is by ingestion/load_to_bigquery.py
+    tables:
+      - name: plans
+      - name: customers
+        columns:
+          - name: customer_id
+            data_tests:
+              - not_null: {config: {severity: warn}}
+              - unique:   {config: {severity: warn}}
+          - name: age_band
+            data_tests:
+              - not_null: {config: {severity: warn}}
+      - name: usage_daily
+        columns:
+          - name: customer_id
+            data_tests:
+              - not_null: {config: {severity: warn}}
+      - name: recharges
+        columns:
+          - name: recharge_id
+            data_tests:
+              - unique: {config: {severity: warn}}
+          - name: customer_id
+            data_tests:
+              - relationships:
+                  arguments:
+                    to: source('raw', 'customers')
+                    field: customer_id
+                  config: {severity: warn}
+      - name: tickets
+        columns:
+          - name: customer_id
+            data_tests:
+              - not_null: {config: {severity: warn}}

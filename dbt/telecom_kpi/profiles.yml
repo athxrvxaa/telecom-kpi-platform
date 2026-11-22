@@ -1,0 +1,14 @@
+# Uses your gcloud login (Application Default Credentials). No key file needed.
+# If you see "Not found: Dataset ... in location X", add:   location: <your dataset location>
+# (BigQuery console -> raw dataset -> "Data location").
+telecom_kpi:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: telecom-kpi-platform-515209
+      dataset: staging
+      threads: 4
+      priority: interactive
+      job_execution_timeout_seconds: 600

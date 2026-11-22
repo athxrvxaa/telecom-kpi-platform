@@ -1,0 +1,27 @@
+Kpi PBI pending updates:
+
+
+Three things are wrong and need fixing:
+
+Page 3, “avg data per sub-day” chart. It plots Sum of avg_data_mb_per_sub_day, which adds up 20 averages and gives about 36,000 MB. The real figure is about 1,800 MB. Drag in the Avg Data per Sub-Day (MB) measure instead of the raw column.
+Page 4, SLA compliance by priority. The title says “%GT SLA Compliance”, so a “Show value as: percent of grand total” setting is on. That’s why the bars exceed 100%. Turn it off. The true values are P1 74%, P3 70% and P2 57%. Check the category chart for the same setting.
+Page 4, “Avg CSAT by SLA Status”. Both bars are identical, which can’t be right. My guide’s suggestion for this chart was weak, because the KPI table has no per-ticket breach flag. The real gap is large (about 2.5 for breached tickets against about 4.0 for within-SLA), and it’s your best insight.
+Fix: Get data, then load fct_ticket from marts (31K rows).
+Add a calculated column: SLA Status = IF(fct_ticket[is_sla_breached], "Breached", "Within SLA").
+Add a measure: Avg CSAT (ticket) = AVERAGE(fct_ticket[csat_score]).
+Chart that measure by SLA Status.
+
+One thing is misleading (Page 2): the churn-driver bars look dramatic (about 100% churn for “usage down 50%+”, 78% for “2+ tickets”), but they are overstated for two reasons:
+
+Churned customers are measured at their disconnect date, so the usage drop and extra tickets are the last 30 days before they leave. That describes behaviour at churn, not a prediction.
+The generator planted those patterns on purpose, so they aren’t discoveries. “Never recharged: 80%” is also partly a data-window artifact, because recharge history before May 2026 isn’t in the data.
+
+Retitle the page “Behaviour in the 30 days before disconnect” and add a small footnote, “Synthetic data with built-in churn patterns”. Don’t call it predictive. In an interview, being upfront about this reads better than overclaiming.
+
+Polish list (about 45 minutes):
+
+Format the measures: Churn Rate, SLA Compliance and Payment Failure Rate as 0.0%, and ARPU as ₹#,##0.
+Replace default titles like “Sum of total_data_gb” with readable ones.
+Start the Page 3 axes at 0, and turn off line smoothing, which distorts trends.
+On Page 5, add a “Rows removed” measure (raw minus staging). The reconciliation chart is dominated by the 4.6M usage rows, so the others are invisible.
+Apply one consistent theme.

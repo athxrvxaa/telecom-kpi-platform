@@ -1,0 +1,100 @@
+version: 2
+
+models:
+  - name: dim_date
+    columns:
+      - name: date_key
+        data_tests: [unique, not_null]
+      - name: date_day
+        data_tests: [unique, not_null]
+
+  - name: dim_plan
+    columns:
+      - name: plan_id
+        data_tests: [unique, not_null]
+
+  - name: dim_sla_target
+    columns:
+      - name: priority
+        data_tests: [unique, not_null]
+
+  - name: dim_customer
+    description: One row per customer (cleaned, deduplicated).
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+      - name: plan_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_plan'), field: plan_id}
+      - name: tenure_band
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['0-3 months', '3-12 months', '1-2 years', '2+ years']}
+
+  - name: fct_usage_daily
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_customer'), field: customer_id}
+      - name: date_key
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+
+  - name: fct_recharge
+    columns:
+      - name: recharge_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_customer'), field: customer_id}
+      - name: date_key
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+
+  - name: fct_ticket
+    columns:
+      - name: ticket_id
+        data_tests: [unique, not_null]
+      - name: priority
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_sla_target'), field: priority}
+      - name: sla_hours
+        description: Target resolution time in hours (from dim_sla_target).
+        data_tests: [not_null]
+      - name: is_sla_breached
+        data_tests: [not_null]
+
+  - name: kpi_monthly_arpu
+    description: Cash-basis ARPU by month, segment and circle.
+    columns:
+      - name: month_start
+        data_tests: [not_null]
+      - name: active_subscribers
+        data_tests: [not_null]
+
+  - name: kpi_monthly_churn
+    columns:
+      - name: month_start
+        data_tests: [not_null]
+
+  - name: kpi_monthly_usage
+    columns:
+      - name: month_start
+        data_tests: [not_null]
+
+  - name: kpi_monthly_ticket_sla
+    columns:
+      - name: month_start
+        data_tests: [not_null]
+
+  - name: mart_customer_360
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]

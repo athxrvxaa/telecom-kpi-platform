@@ -1,0 +1,80 @@
+version: 2
+
+# These tests run with severity=error. After staging, every injected defect must be gone.
+models:
+  - name: stg_plans
+    columns:
+      - name: plan_id
+        data_tests: [unique, not_null]
+      - name: plan_type
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['Prepaid', 'Postpaid']}
+
+  - name: stg_customers
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+      - name: segment
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['Prepaid', 'Postpaid']}
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['Active', 'Disconnected']}
+      - name: circle
+        description: Standardised to Title Case with no stray whitespace.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Maharashtra', 'Uttar Pradesh', 'Delhi', 'Madhya Pradesh', 'Gujarat',
+                         'Karnataka', 'Tamil Nadu', 'West Bengal', 'Rajasthan', 'Kerala']
+      - name: age_band
+        data_tests: [not_null]
+      - name: plan_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('stg_plans'), field: plan_id}
+
+  - name: stg_usage_daily
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('stg_customers'), field: customer_id}
+      - name: usage_date
+        data_tests: [not_null]
+
+  - name: stg_recharges
+    columns:
+      - name: recharge_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('stg_customers'), field: customer_id}
+      - name: payment_status
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['Paid', 'Failed']}
+
+  - name: stg_tickets
+    columns:
+      - name: ticket_id
+        data_tests: [unique, not_null]
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('stg_customers'), field: customer_id}
+      - name: priority
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['P1', 'P2', 'P3']}
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments: {values: ['Open', 'Closed']}

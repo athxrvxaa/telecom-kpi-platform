@@ -1,0 +1,27 @@
+name: telecom_kpi
+version: "1.0.0"
+config-version: 2
+profile: telecom_kpi
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Last day of the generated data. Anything dated after this is a defect.
+  data_end_date: "2026-10-31"
+  data_start_date: "2026-05-01"
+
+models:
+  telecom_kpi:
+    staging:
+      +schema: staging
+      +materialized: table
+    marts:
+      +schema: marts
+      +materialized: table
+    monitoring:
+      +schema: marts
+      +materialized: table
